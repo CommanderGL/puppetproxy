@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puppetproxy</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script defer>
+        const socket = io();
+
+        socket.emit('viewport', window.innerWidth, window.innerHeight);
+
+        window.addEventListener('resize', () => {
+            socket.emit('viewport', window.innerWidth, window.innerHeight);
+        });
+
+        let init = false;
+
+        socket.on('screenshot', screenshot => {
+            init = true;
+            document.querySelector('img').src = `data:image/png;base64,${screenshot}`;
+        });
+
+        window.addEventListener('keydown', e => {
+            if (init) socket.emit('keydown', e.key);
+        });
+
+        document.addEventListener('wheel', e => {
+            if (init) socket.emit('scroll', e.deltaX, e.deltaY);
+        });
+
+        window.addEventListener('mousedown', e => {
+            if (init) socket.emit('mousedown', e.button);
+        });
+
+        window.addEventListener('mouseup', e => {
+            if (init) socket.emit('mouseup', e.button);
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (init) socket.emit('mousemove', e.x, e.y);
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,body {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body>
+    <img alt="screenshot">
+</body>
+</html>
